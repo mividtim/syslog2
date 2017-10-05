@@ -1,10 +1,10 @@
 {
-  "name": "syslog2",
-  "version": "1.0.7",
-  "description": "Multi-transport Syslog stream with reconnect",
+  "name": "syslog2-pure-js",
+  "version": "1.0.0",
+  "description": "Multi-transport Syslog stream with reconnect, forked from syslog2 by Kris Reeves, with Unix sockets support removed",
   "repository": {
     "type": "git",
-    "url": "https://github.com/myndzi/syslog2"
+    "url": "https://github.com/mividtim/syslog2"
   },
   "main": "./index.js",
   "dependencies": {
@@ -26,5 +26,6 @@
     "streams2"
   ],
   "author": "Kris Reeves",
+  "maintainer": "Tim Garthwaite <tim@mividstudios.com>",
   "license": "ISC"
 }
