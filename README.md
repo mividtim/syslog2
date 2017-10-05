@@ -1,6 +1,6 @@
 # Syslog2
 
-This module presents as a Node (streams2) writable stream, and outputs to Syslog. It supports structured data and minor interruption recovery (it will try a couple times to reconnect if your connection is dumped). It is written in pure Javascript, no native bindings (as far as I can tell, the native bindings syslog module on NPM just open a unix domain socket to /dev/log anyway). I wrote it because the available modules that I could find are basic, with poor tests, or otherwise lacking, and it didn't seem that there was anything available written to the full RFC 5424 specification.
+This module presents as a Node (streams2) writable stream, and outputs to Syslog. It supports structured data and minor interruption recovery (it will try a couple times to reconnect if your connection is dumped). It is written in pure Javascript, no native bindings. I wrote it because the available modules that I could find are basic, with poor tests, or otherwise lacking, and it didn't seem that there was anything available written to the full RFC 5424 specification.
 
 # Usage
 
@@ -22,7 +22,7 @@ Various options are supported in the constructor/`.create` method:
 	    useStructuredData: <boolean>,
 	    defaultSeverity: <string>,
 	    PEN: <integer>,
-	    
+
 	    type: <string>,
 	    facility: <string>,
 	    {host|hostname}: <string>,
@@ -31,10 +31,9 @@ Various options are supported in the constructor/`.create` method:
     	pid: <integer>,
 
         connection: {
-	        type: {tcp|udp|unix|stream},
+	        type: {tcp|udp|stream},
 	        host: <adress>,
 	        port: <port>,
-	        path: <unix domain socket>,
 	        stream: <node stream>
 		},
 		reconnect: {
@@ -47,14 +46,13 @@ Various options are supported in the constructor/`.create` method:
 	})
 
 ### Connection
-This is an object specifying connection details. All keys are optional. If you do not specify 'type', it will be inferred from other keys provided (If `path` exists, it assumes a unix domain socket; if `stream` exists, it assumes a stream; otherwise it assumes UDP).
- 
+This is an object specifying connection details. All keys are optional. If you do not specify 'type', it will be inferred from other keys provided (if `stream` exists, it assumes a stream; otherwise it assumes UDP).
+
     new Syslog({
         connection: {
-	        type: {tcp|udp|unix|stream},
+	        type: {tcp|udp|stream},
 	        host: <adress>,
 	        port: <port>,
-	        path: <unix domain socket>,
 	        stream: <node stream>
 		}
     });
@@ -64,16 +62,15 @@ Defaults are:
 - type: `udp`
 - host: `127.0.0.1`
 - port: `514`
-- path: `/dev/log`
 
 ### Reconnect
-Controls the reconnect behavior. All keys are optional. 
+Controls the reconnect behavior. All keys are optional.
 
 - enabled: Whether to enable auto reconnect. Default: false
 - maxTries: How many times to attempt to reconnect. Default: Infinity
 - initialDelay: How long to wait before attempting to reconnect, first try. Default: 100
 - delayFactor: How much to increase the retry delay after each attempt; this value is *multiplied* against the current delay. Default: 1.2
-- maxDelay: The maximum value the retry delay can have. Default: 30000 
+- maxDelay: The maximum value the retry delay can have. Default: 30000
 
 ### Syslog-specific keys
 All keys other than `connection` and `reconnect` are passed along to [syslog-streams2](https://www.npmjs.com/package/syslog-streams2). That documentation is included here for convenience, but be aware that changes there supersede anything written here.
@@ -102,7 +99,7 @@ This is passed along to glossy to specify what type of output to create. Right n
 The facility to log to. Case insensitive. Defaults to `local0`. Can be overridden in `.write()`.
 
 Valid facilities are:
-	
+
 	KERN - Kernel messages
 	USER - User-level messages
 	MAIL - Mail system
@@ -136,14 +133,14 @@ From RFC5424:
 	the originator in the format specified in STD 13 [RFC1034].  This
 	format is called a Fully Qualified Domain Name (FQDN) in this
 	document.
-	
+
 	In practice, not all syslog applications are able to provide an FQDN.
 	As such, other values MAY also be present in HOSTNAME.  This document
 	makes provisions for using other values in such situations.  A syslog
 	application SHOULD provide the most specific available value first.
 	The order of preference for the contents of the HOSTNAME field is as
 	follows:
-		
+
 	1. FQDN
 	2. Static IP address
 	3. hostname
@@ -151,7 +148,7 @@ From RFC5424:
 	5. the NILVALUE
 
 ### pid
-The process id of the process generating the log message. Defaults to `process.pid`, falls back on the nil value(`-`). Can be overridden in `.write()`. 
+The process id of the process generating the log message. Defaults to `process.pid`, falls back on the nil value(`-`). Can be overridden in `.write()`.
 
 ### name / appName
 The app name to use when logging messages. Defaults to `process.title`, falls back on `process.argv[0]` followed by the nil value(`-`). Can be overriden in `.write()`.
@@ -197,7 +194,7 @@ Records that fail validation, or that return `false` when run through Glossy wil
 
 This will generate the header field according to the options created on instantiation and append the specified message. Example:
 
-`<149>1 2014-12-05T22:44:25.863Z myndzi node 20308 - foo` 
+`<149>1 2014-12-05T22:44:25.863Z myndzi node 20308 - foo`
 
 ### Plain object
 
@@ -206,7 +203,7 @@ This module makes use of [syslog-streams2](https://www.npmjs.com/package/syslog-
 #### Bunyan record
 
 Typically, you would use the bunyan module to write data to the stream, but if you write data that validates against a Bunyan record, it will be interpreted as such. Bunyan records look like this:
- 
+
     {
         v: <version>,
         level: <log level>,
@@ -252,7 +249,7 @@ Glossy records look like this:
 - msg: the message you want to log. Any extra keys not processed into structured data will be appended to this message as JSON.
 - appName: A string; defaults to the instantiated value
 - msgId: A string; defaults to the instantiated value
- 
+
 
 ### Misc. unlikelihoods
 
@@ -265,7 +262,7 @@ Any extra keys passed on an object will first be converted to structured data if
 `log.write({ foo: 'bar' });`
 
 Outputs:
- 
+
 `<149>1 2014-12-05T22:58:07.725Z myndzi node 20428 - hello {"foo":"bar"}`
 
 # Structured data
@@ -286,7 +283,7 @@ Example:
 
 outputs:
 
-`<149>1 2014-12-05T23:01:36.170Z myndzi node 20465 - [meta ip="127.1.1.1"] hello` 
+`<149>1 2014-12-05T23:01:36.170Z myndzi node 20465 - [meta ip="127.1.1.1"] hello`
 
 while
 
