@@ -21,7 +21,7 @@ after(unlink);
 describe('Transports', function () {
     describe('tcp', function () {
         var server;
-        
+
         before(function (done) {
             server = net.createServer();
             server.listen(BIND_PORT, done);
@@ -37,42 +37,13 @@ describe('Transports', function () {
                     port: BIND_PORT
                 }
             });
-            
+
             server.once('connection', function (socket) {
                 socket.once('data', function (chunk) {
                     log.end(done);
                 });
             });
-            
-            log.connect(function () {
-                log.write({msg: 'hello'});
-            });
-        });
-    });
-    describe('unix socket', function () {
-        var server;
-        
-        before(function (done) {
-            server = net.createServer();
-            server.listen(SOCKET_FILE, done);
-        });
-        after(function (done) {
-            server.close(done);
-        });
-        it('should connect and pass messages', function (done) {
-            var log = new Syslog({
-                connection: {
-                    type: 'unix',
-                    path: SOCKET_FILE
-                }
-            });
-            
-            server.once('connection', function (socket) {
-                socket.once('data', function (chunk) {
-                    log.end(done);
-                });
-            });
-            
+
             log.connect(function () {
                 log.write({msg: 'hello'});
             });
@@ -80,7 +51,7 @@ describe('Transports', function () {
     });
     describe('udp', function () {
         var server;
-        
+
         before(function (done) {
             server = dgram.createSocket('udp4');
             server.bind(BIND_PORT, done);
@@ -96,11 +67,11 @@ describe('Transports', function () {
                     port: BIND_PORT
                 }
             });
-            
+
             server.once('message', function (chunk) {
                 log.end(done);
             });
-            
+
             log.connect(function () {
                 log.write({msg: 'hello'});
             });
@@ -110,7 +81,7 @@ describe('Transports', function () {
 
 describe('Syslog2', function () {
     var server;
-    
+
     beforeEach(function (done) {
         server = net.createServer();
         server.listen(BIND_PORT, done);
@@ -126,11 +97,11 @@ describe('Syslog2', function () {
                 port: BIND_PORT
             }
         });
-        
+
         server.once('connection', function (socket) {
             socket.destroy();
         });
-        
+
         log.connect(function () {
             log.once('error', function (err) {
                 err.message.should.match(/Disconnected, reconnect disabled/);
@@ -152,12 +123,12 @@ describe('Syslog2', function () {
                 maxDelay: 0
             }
         });
-        
+
         server.once('connection', function (socket) {
             log.stream.emit('error', 'foo');
             socket.destroy();
         });
-        
+
         log.connect(function () {
             log.once('warn', function (err) {
                 err.should.equal('foo');
@@ -165,7 +136,7 @@ describe('Syslog2', function () {
             });
         });
     });
-    
+
     it('should give up after the specified number of reconnection attempts', function (done) {
         var log = new Syslog({
             connection: {
@@ -180,11 +151,11 @@ describe('Syslog2', function () {
                 maxDelay: 0
             }
         });
-        
+
         server.once('connection', function (socket) {
             socket.destroy();
         });
-        
+
         log.connect(function () {
             log.once('error', function (err) {
                 err.should.match(/Unable to reconnect, reach max retries/);
@@ -192,7 +163,7 @@ describe('Syslog2', function () {
             });
         });
     });
-    
+
     it('should not try to reconnect multiple times', function (done) {
         var log = new Syslog({
             connection: {
@@ -207,27 +178,27 @@ describe('Syslog2', function () {
                 maxDelay: 0
             }
         });
-        
+
         server.once('connection', function (socket) {
             socket.destroy();
         });
-        
+
         log.connect(function () {
             var warnings = 0;
-            
+
             log.on('warn', function () {
                 warnings++;
             });
-            
+
             log.once('error', function (err) {
                 warnings.should.equal(100);
-                
+
                 err.should.match(/Unable to reconnect, reached max retries/);
                 log.end(done);
             });
         });
     });
-    
+
     it('should buffer messages for delivery when connected', function (done) {
         var log = new Syslog({
             connection: {
@@ -236,20 +207,20 @@ describe('Syslog2', function () {
                 port: BIND_PORT
             }
         });
-        
+
         server.once('connection', function (socket) {
             socket.once('data', function (chunk) {
                 log.end(done);
             });
         });
-        
+
         log.on('warn', function (err) {
             console.log(err.stack);
         });
         log.write({ msg: 'hello' });
         log.connect();
     });
-    
+
     xit('should not lose messages on write errors', function (done) {
         // implement the ring buffer thing and a protection layer rather than a direct pipe
     });
