@@ -1,6 +1,6 @@
 {
   "name": "syslog2-pure-js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Multi-transport Syslog stream with reconnect, forked from syslog2 by Kris Reeves, with Unix sockets support removed",
   "repository": {
     "type": "git",

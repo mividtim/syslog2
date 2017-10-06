@@ -1,10 +1,21 @@
 # Syslog2
 
-This module presents as a Node (streams2) writable stream, and outputs to Syslog. It supports structured data and minor interruption recovery (it will try a couple times to reconnect if your connection is dumped). It is written in pure Javascript, no native bindings. I wrote it because the available modules that I could find are basic, with poor tests, or otherwise lacking, and it didn't seem that there was anything available written to the full RFC 5424 specification.
+This module presents as a Node (streams2) writable stream, and outputs to
+Syslog. It supports structured data and minor interruption recovery (it will
+try a couple times to reconnect if your connection is dumped). It is written in
+pure Javascript, no native bindings. Kris Reeves wrote it because the available
+modules that he could find were basic, with poor tests, or otherwise lacking,
+and it didn't seem that there was anything available written to the full
+RFC 5424 specification.
+
+Tim Garthwaite forked Kris's original implementation to remove Unix socket
+support, so that there really are no native bindings. This is useful when
+you'd like to do an install on one platform, but publish to another, for
+instance when developing on Mac but delivering on an embedded Linux system.
 
 # Usage
 
-    var Syslog = require('syslog2');
+    var Syslog = require('syslog2-pure-js');
 	var log = Syslog.create();
 
 	log.write('message');
@@ -229,26 +240,25 @@ Extra keys are added directly to the Bunyan object.
 Glossy records look like this:
 
     {
-        facility: <facility>,
-        severity: <severity>,
-        host: <originating hostname>,
         appName: <originating application name>,
-        pid: <originating process id>,
         date: <timestamp>,
+        facility: <facility>,
+        host: <originating hostname>,
+        severity: <severity>,
+        pid: <originating process id>,
         message: <log message>,
         structuredData: <structured data>
     }
 
-- facility: a syslog *facility* identifier, as above; Defaults to the instantiated value.
-- severity: a syslog *severity* identifier
-- level: the log level to use. You may specify a numerical value from 0-100 or a Bunyan log level string ('fatal', 'error', 'warn', 'info', 'debug', 'trace'). Case insensitive. Left empty, it will default to the syslog 'notice' level.
-- name: A string; defaults to the instantiated value
-- hostname: A string; defaults to the instantiated value
-- pid: The originating proccess ID. Left empty, will use the value of `process.pid` or the nil value if unavailable.
-- time: the timestamp to use. You may specify a Javascript Date object or any string that can be converted to one. (*Note: Javascript will convert strings in local system time if they do not contain timestamp information*) Left empty, it will default to the current timestamp.
-- msg: the message you want to log. Any extra keys not processed into structured data will be appended to this message as JSON.
 - appName: A string; defaults to the instantiated value
+- date: the timestamp to use. You may specify a Javascript Date object or any string that can be converted to one. (*Note: Javascript will convert strings in local system time if they do not contain timestamp information*) Left empty, it will default to the current timestamp.
+- facility: a syslog *facility* identifier, as above; Defaults to the instantiated value.
+- hostname: A string; defaults to the instantiated value
+- level: the log level to use. You may specify a numerical value from 0-100 or a Bunyan log level string ('fatal', 'error', 'warn', 'info', 'debug', 'trace'). Case insensitive. Left empty, it will default to the syslog 'notice' level.
+- message: the message you want to log. Any extra keys not processed into structured data will be appended to this message as JSON.
 - msgId: A string; defaults to the instantiated value
+- pid: The originating proccess ID. Left empty, will use the value of `process.pid` or the nil value if unavailable.
+- severity: a syslog *severity* identifier
 
 
 ### Misc. unlikelihoods
